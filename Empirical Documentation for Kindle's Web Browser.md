@@ -1,3 +1,7 @@
+---
+stage: published
+---
+
 *Disclaimer: YMMV. Your Kindle may have a better browser than my 2015 model. Let me know if it does!*
 ## Introduction
 

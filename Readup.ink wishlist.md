@@ -1,3 +1,7 @@
+---
+stage: published
+---
+
 *Legend*
 ```
 user = logged-in Readup reader
