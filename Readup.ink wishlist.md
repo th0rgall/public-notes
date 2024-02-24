@@ -1,6 +1,7 @@
 ---
 stage: published
 ---
+This list tracks what I still want to implement on Readup.ink.
 
 *Legend*
 ```
