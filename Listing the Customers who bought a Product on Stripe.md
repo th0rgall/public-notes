@@ -8,9 +8,9 @@ This API, that you might naively expect to exist, **doesn't exist**:
 GET https://api.stripe.com/v1/products/:id/customers — list customers who bought the product with the given id
 ```
 
-Stripe *generally* connects customers to the products they purchased using [Checkout Sessions](https://docs.stripe.com/api/checkout/sessions/object). This model has an API which is a helpful starting point to solve this problem.
+In what follows, I'll describe two different cases where I've answered this question. 
 
-In what follows, I'll describe two cases on how to
+First, a simple case, applicable only to products sold through payment links. Last, a more general approach.
 
 ## Case 1: Using the Checkout Session API with known Payment Links
 
@@ -19,7 +19,7 @@ In this case, we were selling tickets for the online documentary premiere of [Wo
 
 We needed to get the email addresses of the people who bought the documentary, so we could send them an access link some time before the premiere.
 
-To leverage this method, it is important that you only sell the products you want to list customer for through payment links.
+To leverage this method, it is important that you only want to list customers for products sold through payment links.
 ### Method
 
 Purchases through a Payment Link will have inevitably created a Checkout Session.
