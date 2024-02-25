@@ -1,7 +1,7 @@
 ---
 stage: draft
 ---
-To build Readup.ink, and to compile the [[Empirical Documentation for Kindle's Web Browser]], I've created several test HTML pages to test the features of the web browser.
+To build Readup.ink, and to compile the [[Documentation for the Kindle Browser]], I've created several test HTML pages to test the features of the web browser.
 
 Here is a checklist of features that I still want to test.
 ## To check
@@ -10,7 +10,7 @@ Here is a checklist of features that I still want to test.
 
 - [ ] Media queries: do they work?
 - [ ] Can `background-color: transparent;` be used?
-- [ ] Does `text-decoration`, see [[Empirical Documentation for Kindle's Web Browser#^kindle-links|this]].
+- [ ] Does `text-decoration`, see [[Documentation for the Kindle Browser#^kindle-links|this]].
 - [ ] Does `pointer-events: none` work? Apparently a Safari 4 feature.
 
 **JS**

@@ -8,7 +8,9 @@ This API, that you might naively expect to exist, **doesn't exist**:
 GET https://api.stripe.com/v1/products/:id/customers — list customers who bought the product with the given id
 ```
 
-Stripe *generally* connects customers to the products they purchased using [Checkout Sessions](https://docs.stripe.com/api/checkout/sessions/object), which has an API that is a helpful starting point to solve this problem. I'm describing here how I solved this problem in two different cases.
+Stripe *generally* connects customers to the products they purchased using [Checkout Sessions](https://docs.stripe.com/api/checkout/sessions/object). This model has an API which is a helpful starting point to solve this problem.
+
+In what follows, I'll describe two cases on how to
 
 ## Case 1: Using the Checkout Session API with known Payment Links
 
@@ -97,7 +99,7 @@ In this case, I don't think Checkout Sessions are created, which means the above
 
 The ultimate test of the Stripe APIs was a small project we did recently to automate some of our accounting: we wanted to have a PDF for each product, with a table of transactions related to that product, monthly.
 
-I could have used the above mentioned methods for listing Checkout Sessions and Invoices, and then deriving product sales (and customers) from that, but I wanted something that would catch *all* transactions with more certainty. It turns out to be possible.
+I could have used the above mentioned methods for listing Checkout Sessions and Invoices, and then derived product sales (and customers) from that, but I wanted something that would catch *all* transactions with more certainty. It turns out to be possible.
 
 **Reports & Report Runs**
 
