@@ -1,0 +1,3 @@
+ As an alternative to [[Writer article intake from RSS feeds]], Readup's frontend could also delegate RSS article retrieval to a server like [FreshRSS](https://www.freshrss.org/), and connect via the Google Reader API to such servers. In this case, only a single server (per user) may and can be contacted, via a single protocol, which likely eases the development & operational burden.
+ 
+ It would be a semi-independent subsystem, that gets the reader to external article links in a more embedded way. However, it would require the reader to have their own RSS server, which is non-trivial and increases complexity.

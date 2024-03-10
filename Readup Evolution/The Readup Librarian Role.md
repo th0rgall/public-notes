@@ -1,0 +1,1 @@
+This could just as well be called an editor.
