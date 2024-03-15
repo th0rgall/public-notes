@@ -1,6 +1,7 @@
 ---
 title: Requesting thousands of documents with Firestore’s JS SDK breaks silently on low-end Android devices
 created: 2024-03-15
+stage: published
 ---
 This week, I worked around a nasty Firebase problem. A critical part of our web app stopped working for some people.
 
