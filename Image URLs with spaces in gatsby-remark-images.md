@@ -1,5 +1,6 @@
 ---
 stage: published
+created: 2023-10-17
 ---
 While trying to set up this notes section on my Gatsby blog, sourced from an Obsidian Markdown vault, I noticed that references to images in Obsidian with one or more spaces in their path weren't picked up by the `gatsby-remark-images` plugin.
 

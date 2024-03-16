@@ -1,5 +1,7 @@
 ---
 stage: published
+created: 2024-02-25
+title: Listing the customers who bought a product on Stripe
 ---
 Stripe is the payments backbone of much of the internet. Since 2021[^1], it also has no-code [payment links](https://stripe.com/docs/api/payment_links/payment_links?lang=node) that you can tie to [products](https://stripe.com/docs/api/products?lang=node). But figuring out which customers bought a certain product is surprisingly non-obvious!
 
