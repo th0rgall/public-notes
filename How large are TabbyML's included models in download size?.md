@@ -34,6 +34,7 @@ I couldn't easily find the answer; so I wrote a script to generate this table. M
 | Nomic-Embed-Text        | 146.2M        |
 | DeepSeek-Coder-V2-Lite  | 16.8G         |
 | Jina-Embeddings-V2-Code | 172.9M        |
+
 ## The script to generate the above table
 
 Here's the script I used to generate it. The included models and their download URLs can be found in `~/.tabby/models/TabbyML/models.json`. The script uses `curl` to get the `Content-Length` headers from the URLs, and formats the whole as Markdown table fragments which I could include here: 
