@@ -1,0 +1,4 @@
+- You read articles through a medium where Readup's tracker can operate.
+- You can share articles on the Readup platform if you've fully read them, and follow other readers.
+- Full-read counts are publicly 
+- A public daily ranking is made based on full reads of shared articles (AOTD)
