@@ -1,0 +1,3 @@
+Some reading apps, like FreshRSS, [allow extensions to be made](https://github.com/FreshRSS/Extensions) that can alter the behavior of the reader. These extensions could embed the [[Comment embed including tracker|Readup tracker and comment sections]], together with glue code that helps Readup know which source article is currently being read in the third-party reading app.
+
+Even in reading web apps that don't allow extensions to be made explicitly (like Pocket), the Readup web extension could inject the tracker and comments section anyway. As an example, see how the Toggl web extension [integrates with numerous services](https://support.toggl.com/en/articles/2206984-toggl-track-browser-extension).
