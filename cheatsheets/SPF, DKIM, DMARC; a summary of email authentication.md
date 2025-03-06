@@ -1,0 +1,24 @@
+---
+created: 2024-05-01
+stage: published
+---
+Are all authentication protocols, used to verify whether emails are legitimate or not.
+
+First, it's good to review the **basic structure of email**. Email consists of two parts: the **envelope** and **content**. 
+1. The email **envelope** is governed by [RFC5321](https://www.rfc-editor.org/rfc/rfc5321) (the SMTP protocol) and is sent as a series of "SMTP protocol units" (commands).  These commands handle everything related to addressing and message delivery between mail servers.
+2. The email **content** (also called, "data" or "object") is sent as part of an SMTP transmission. It is governed by [RFC5322](https://www.rfc-editor.org/rfc/rfc5322) (the Internet Message Format), which specifies how messages should be structured. The content is also usually the only thing that will be displayed to mail client users. Message content has headers and a body. The body can be plain text, but often it contains HTML too.
+
+Now, we can proceed to the authentication protocols:
+- **[SPF](https://en.wikipedia.org/wiki/Sender_Policy_Framework)** (Sender Policy Framework) concerns itself with the SMTP envelope. It allows a message sender (or [MTA](https://en.wikipedia.org/wiki/Message_transfer_agent)) to state which sending servers (IPs) are authorized to send/relay email on behalf of its domain, using a DNS TXT record starting with `v=spf1`. A mail receiver can then retrieve the email address domain given by the `MAIL FROM:` (`RFC5321.MailFrom`) command, and check via a TXT lookup whether the domain owner has authorized the sending server's IP to send email for that domain, or not.
+- **[DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)** (DomainKeys Identified Mail) concerns itself with the  RFC 5322 mail content. DKIM requires changes to the sender's DNS and to its mail contents:
+	1. The sender domain publishes a DNS `TXT` record (RR) with the name `<selector>._domainkey.<your.domain.com>`, and a data value string that includes a public key.
+	2. Each message with `RFC5322.From` header field from that domain is signed by the sender using its private key. The body and headers are signed by adding another RFC5322 header with the name "DKIM-Signature" ([see example](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail#Signing)). There is some level of configurability for which headers, and what portion of the content is signed.
+	The mail receiver can look up the public key for the domain specified in the DKIM signature, and verify that (parts of) a message's content originated from that domain's owner, and wasn't tampered with. DKIM is only applied to the message content, and therefore *by itself* allows mail forwarding without restrictions (unlike SPF).
+- **[DMARC](https://dmarc.org/overview/)** (Domain-based Message Authentication, Reporting and Conformance) "wraps" SPF & DKIM. Unlike SPF & DKIM (developed in the 2000s), DMARC was developed in the 2010s.
+	- DMARC is configured by a domain owner by publishing a DNS TXT record in the name `_dmarc.<your_domain.com>`, with a data value starting with `v=DMARC1;`. 
+	- DMARC can be configured to ask email recipients to check for "alignment" (equality) when recipients receive email with a `RFC5322.From` containing that domain. One form of alignment (SPF Alignment) occurs when the `RFC5322.From` domain matches the `RFC5321.MailFrom` domain (also called the `Return Path`, sometimes). A second form of alignment (DKIM Alignment) occurs when mail content headers contains a signature from the same domain as the domain in `RFC5322.From` header. The domain owner can ask for a ["strict" or "relaxed"](https://support.valimail.com/en/articles/8466455-dmarc-strict-vs-relaxed-alignment) combination of these alignment checks, to consider mail from their domain as valid.
+	- DMARC also allows domain owners to specify how DMARC verification problems (which may indicate spam or spoofing attempts) should be reported by receiving mail receivers.
+	
+Note that the SMTP envelope can be changed while being forwarded by mail servers, and SPF is only a mechanism for authentication between two servers along the path. See an [SMTP exchange example](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol#SMTP_transport_example), and a [`Return-Path` example](https://stackoverflow.com/a/1247155) for when SPF MAIL FROM/Return-Path rewriting is used. SPF checks may obstruct valid use cases of mail forwarding, in which case the [SRS](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme) (Sender Rewriting Scheme) can be used as a workaround [(example)](https://www.fastmail.help/hc/en-us/articles/360060591073-How-to-set-up-aliases#advanced).
+
+These solutions work on different levels, and should be combined if possible. However, I think that DKIM together with DMARC DKIM Alignment is the most important to ensure the authenticity of email content.
