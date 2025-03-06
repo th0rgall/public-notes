@@ -2,11 +2,11 @@
 created: 2024-05-01
 stage: published
 ---
-Are all authentication protocols, used to verify whether emails are legitimate or not.
+SPF, DKIM and DMARC all authentication protocols used to verify whether emails are legitimate or not.
 
-First, it's good to review the **basic structure of email**. Email consists of two parts: the **envelope** and **content**. 
+To understand them, it's good to review the **basic structure of email** first. Email consists of two parts: the **envelope** and **content**. 
 1. The email **envelope** is governed by [RFC5321](https://www.rfc-editor.org/rfc/rfc5321) (the SMTP protocol) and is sent as a series of "SMTP protocol units" (commands).  These commands handle everything related to addressing and message delivery between mail servers.
-2. The email **content** (also called, "data" or "object") is sent as part of an SMTP transmission. It is governed by [RFC5322](https://www.rfc-editor.org/rfc/rfc5322) (the Internet Message Format), which specifies how messages should be structured. The content is also usually the only thing that will be displayed to mail client users. Message content has headers and a body. The body can be plain text, but often it contains HTML too.
+2. The email **content** (also called, "data" or "object") is sent as part of an SMTP transmission. It is governed by [RFC5322](https://www.rfc-editor.org/rfc/rfc5322) (the Internet Message Format), which specifies how messages should be structured. The content is also usually the only thing that will be displayed to mail client users, like Gmail webmail, or Thunderbird. Message content has headers and a body. The body can be plain text, but often it contains HTML too.
 
 Now, we can proceed to the authentication protocols:
 - **[SPF](https://en.wikipedia.org/wiki/Sender_Policy_Framework)** (Sender Policy Framework) concerns itself with the SMTP envelope. It allows a message sender (or [MTA](https://en.wikipedia.org/wiki/Message_transfer_agent)) to state which sending servers (IPs) are authorized to send/relay email on behalf of its domain, using a DNS TXT record starting with `v=spf1`. A mail receiver can then retrieve the email address domain given by the `MAIL FROM:` (`RFC5321.MailFrom`) command, and check via a TXT lookup whether the domain owner has authorized the sending server's IP to send email for that domain, or not.
