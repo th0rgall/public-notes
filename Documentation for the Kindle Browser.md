@@ -32,14 +32,15 @@ This is what I set out to do with **[Readup.ink](https://github.com/th0rgall/rea
 
 I can imagine more fun uses:
 
-- web web client for an RSS feed reader? [FreshRSS](https://www.freshrss.org/), perhaps?
+- a web client for an RSS feed reader? [FreshRSS](https://www.freshrss.org/), perhaps? **Update: [I have built this now](https://codeberg.org/thor/kindle-rss)**.
 - a simple Mastodon web client for Kindle?
 - ...
-  I hope this note helps people on their way to build such cool web apps for the Kindle (or other common e-ink devices).
+
+I hope this note helps people on their way to build such cool web apps for the Kindle (or other common e-ink devices).
 
 ## Tested on a Kindle Paperwhite 3
 
-Everything here should be prefaced with the observation that I tested the browser on my Kindle device, which is a **Kindle Paperwhite 3 (7th generation) from 2015.** ([Wikipedia](<https://en.wikipedia.org/wiki/Amazon_Kindle#Kindle_Paperwhite_(third_iteration)>)).
+Everything here should be prefaced with the observation that I tested the browser on my Kindle device, which is a **Kindle Paperwhite 3 (7th generation) from 2015.** ([Wikipedia](<https://en.wikipedia.org/wiki/Amazon_Kindle#Kindle_Paperwhite_(third_iteration)>)). It is, admittedly, old.
 
 At the moment of writing, it is running the "Firmware Version" 5.16.2.1.1 (40974470002)
 
@@ -143,9 +144,10 @@ These are the features I've tested.
 
 | Feature                               | Working? | Comment                          |
 | ------------------------------------- | -------- | -------------------------------- |
-| flexbox, grid                         | ❌       | use bad old `float` & clearfixes |
-| `position: sticky`, `position: fixed` | ❌       | they seem just static            |
-| `rem` sizes                           | ✅       |                                  |
+| flexbox, grid                         | ❌        | use bad old `float` & clearfixes |
+| `position: sticky`, `position: fixed` | ❌        | they seem just static            |
+| `rem` sizes                           | ✅        |                                  |
+| Media queries                         | ✅        | screen width queries tested      |
 
 ### JS
 
