@@ -4,7 +4,7 @@ title: Challenges using SendGrid as a multilingual start-up & how to work around
 source:
   - https://www.notion.so/thorgalle/Little-SendGrid-rant-cafd5b563b1e4df8bdb93dddb16773e9?pvs=4
 created: 2025-02-25
-updated:
+updated: 2025-03-28
 ---
 At [Welcome To My Garden](/projects/welcome-to-my-garden) and other projects of Slowby, we've used SendGrid's Transactional Email API since the start in 2020. During 2023 and later, I integrated our systems more deeply with SendGrid's Marketing offering: _Contact Lists_, _Single Sends_ and _Automations_.
 
@@ -22,7 +22,7 @@ Among others, caring about the user experience in multiple languages causes a wa
 
 First, I'll review some things I appreciate about SendGrid. 
 
-- **The core:** SendGrid does the most essential thing well: **sending email**. As far as we can verify, when we use the transactional email API, or click "Send" on a newsletter, SendGrid does its job.
+- **The core:** SendGrid does the most essential thing well: **sending email**. As far as we can verify, when we use the transactional email API, or click "Send" on a newsletter, SendGrid does its job[^1].
 - **Pricing:** from a shallow comparison, SendGrid is still competitively priced compared to competitors.
 	- In terms of marketing, MailChimp seems more expensive, but Brevo seems cheaper.
 	- In terms of transactional email, SendGrid seems cheaper than MailGun, but more expensive than Amazon SES or Brevo.
@@ -30,6 +30,7 @@ First, I'll review some things I appreciate about SendGrid.
 - The **Marketing WYSIWYG drag & drop "Design editor" works**. It's a pain to fine-tune colors and font-sizes sometimes when dragging in new blocks, but it works for non-programming colleagues too.
 - Over the last three years, dashboard login has improved (no more mandatory _Twilio Authy_ for TOTP), as well as handling something called _Subuser Management_.
 - The **inbound parse** API also works pretty well.
+- SendGrid's email open, link click tracking and **event webhooks** are powerful.
 - Their support is pretty responsive and helpful!
 
 Now, over to meat of this note, **the caveats:** some features in the SendGrid offering have frustrating holes and limitations, or counteract a good developer and user experience. I'm sure the technical difficulty of making a scalable email marketing & sending system is enormous, but when I compare this to other big cloud services we're using, I am still left with the feeling that developer experience less of a priority for SendGrid. The following should illustrate that.
@@ -72,14 +73,20 @@ Here's why: our **contacts** would be split, too. We want to reference the same 
 
 While the API is mostly well-documented and structured logically, you should read the docs very carefully, because there are some inconsistencies and peculiarities.
 
-Some examples:
+Here are the surprises I've encountered:
 
-- Some methods require unique contact IDs as parameters (*delete a contact*), some require email addresses (*upsert contact, add a contact to a list*)
-- Some methods expect a JSON-encoded request body (*upsert contact*), some expect a comma-separated list in a query parameter (*delete a contact from a list*)
-- The method to *add* emails to a suppression group (= unsubscribe) supports multiple emails. The method to *remove* emails from a suppression group (= resubscribe) only supports one email.
-- For a contact export job, the resulting job ID has the key `id`. For a contact import job, it has the key `job_id`.
-- When you create a contact, you have to supply custom fields by using SendGrid-generated custom field IDs as keys, for example `{communication_language: "nl" host: 0}` (A) should be given as `{ e3_T: "nl", e2_N: 0 }` (B), where I believe `e3_T` means it's the **3**rd **e**xtra field of the **T**ext type. You have to look up these field key IDs from [the custom field definitions API](https://www.twilio.com/docs/sendgrid/api-reference/custom-fields/get-all-field-definitions), they are not shown in the dashboard where you might have created them. Finally, when you retrieve a contact, the `custom_fields` are returned using the full field names (A). Not the most convenient create-retrieve API.
-- There is a powerful contact search endpoint which supports an expressive query language that can accept queries with array-contains clauses of at least 5000 values (the most I've tested). However, it also only returns max 50 contacts. And there is no way to get the next page (or maybe there was, they [killed it](https://community.n8n.io/t/sendgrid-get-all-contacts-limited-to-50/13106/2)). 
+- **Inconsistent input formats:**
+	- Some methods require unique contact IDs as parameters (*delete a contact*), some require email addresses (*upsert contact, add a contact to a list*).
+	- Some methods expect a JSON-encoded request body (*upsert contact*), some expect a comma-separated list in a query parameter (*delete a contact from a list*)
+- **Broken mirrors:**
+	- The method to *add* emails to a suppression group (= unsubscribe) supports multiple emails. The method to *remove* emails from a suppression group (= resubscribe) only supports one email.
+	- When you create a contact, you have to supply custom fields by using SendGrid-generated custom field IDs as keys, for example `{communication_language: "nl" host: 0}` (A) should be given as `{ e3_T: "nl", e2_N: 0 }` (B), where I believe `e3_T` means it's the **3**rd **e**xtra field of the **T**ext type. You have to look up these field key IDs from [the custom field definitions API](https://www.twilio.com/docs/sendgrid/api-reference/custom-fields/get-all-field-definitions), they are not shown in the dashboard where you might have created them.
+	  Finally, when you retrieve a contact, the `custom_fields` are returned using the full field names (A). Not the most convenient create-retrieve API.
+- **Hidden options:** Some methods, like the one to retrieve [all unsubscribe-related suppressions](https://www.twilio.com/docs/sendgrid/api-reference/suppressions-suppressions/retrieve-all-suppressions), are actually paginated,[ but don't document their pagination parameters](https://stackoverflow.com/questions/64675395/how-can-i-implement-pagination-with-sendgrid-api).
+- **Inconsistent property naming:**
+	- For a contact export job, the resulting job ID has the key `id`. For a contact import job, it has the key `job_id`.
+	- Listing all Contact Lists returns an object with a `result` key (singular). Listing all Segments returns an `results` key (plural).
+- **Unexplained limits:** There is a powerful contact search endpoint which supports an expressive query language that can accept queries with array-contains clauses of at least 5000 values (the most I've tested). However, it also only returns max 50 contacts. And there is no way to get the next page (or maybe there was, they [killed it](https://community.n8n.io/t/sendgrid-get-all-contacts-limited-to-50/13106/2)). 
 
 ## 5. 🔨 Adding a single contact? Use async bulk upsert endpoints
 
@@ -99,27 +106,38 @@ The contact upsert job takes at least 20 seconds, but **it might take up to 6 mi
 
 One more unhappy surprise: sometimes (admittedly rare, we had ~60/40.000 cases = 0.15%), the creation **job simply fails**. You can then fetch a report URL from the job status endpoint, and perform yet another call to retrieve the XML error document stating the cause of the job failure. It will likely contain an internal timeout error like `<Code>AccessDenied</Code> <Message>Request has expired</Message>`. Maybe SendGrid's internal queue was temporarily overloaded? A simple retry always fixed it for me, but it's good to know their system isn't 100% reliable, not even 99.99%.
 
-## 6. 🐢 Slow Segmentation Lists as a basis for delayed Automations
+## 6. 🐢 Slow Segmentation Lists as a basis for unreliable Automations
 
 [Contact List Segments](https://www.twilio.com/docs/sendgrid/ui/managing-contacts/segmenting-your-contacts) are an important part of our SendGrid workflow. For example, they split our "Agreed to the newsletter" parent list into automated sub-lists (segments) for each language (which is a contact custom field), so we can later target these segments with language-specific Single Sends. If a contact changes their language, they will automatically move to the correct segment. 
 
-We also use segments as the basis of all our Automation flows. For these we add additional criteria for segmentation beyond language, like a segment with contacts who added garden, to send new hosts a welcome email. Segments are flexible because they can cover [all kinds of SQL-inspired expressions](https://www.twilio.com/docs/sendgrid/for-developers/sending-email/getting-started-the-marketing-campaigns-v2-segmentation-api) to segment contacts based on their default fields (country, name, ...) and custom fields.
+We also use segments as the basis of all our Automation flows. For these we add additional criteria for segmentation beyond language, like a segment with contacts who added garden to their profile, to send new hosts a welcome email. Segments are flexible because they can cover [all kinds of SQL-inspired expressions](https://www.twilio.com/docs/sendgrid/for-developers/sending-email/getting-started-the-marketing-campaigns-v2-segmentation-api) to segment contacts based on their default fields (country, name, ...) and custom fields.
 
 However, Segments also have serious **timing-related limitations**, _especially_ when you don't use of Unsubscribe Groups.
+### Delayed automation entry
 
 SendGrid [claims](https://www.twilio.com/docs/sendgrid/ui/managing-contacts/segmenting-your-contacts#segment-refresh-cadence) in the docs:
 
 > Twilio SendGrid checks for **newly added** or **modified contacts** who meet a segment's criteria on an **hourly schedule**. Only existing contacts who meet a segment's criteria will be included in the segment **searches** within 15 minutes.
 
-So, if your user does something in your app and you update a contact custom field based on that, which then makes the contact match the entry conditions for a segment, it may take an hour before the contact is actually put into that segment. However, from observations in our app, we noticed that **there are non-negligible outliers where it may take several hours before the change is effected**, sometimes even 10 hours.
+So, if your user does something in your app and you update a contact custom field based on that, which then makes the contact match the entry conditions for a segment, it may take an hour before the contact is actually put into that segment. However, from observations in our app, we noticed that **there are non-negligible outliers where it may take several hours before the change is effected**, sometimes even **half a day** or more.
 
-This is annoying and slightly misleading when SendGrid's Automation feature also claims to be able to send an "instant" email as soon as a contact enters a segment: the emails will almost never be instant due to the segmentation delays. 
+This is annoying and slightly misleading when SendGrid's Automation feature also claims to be able to send an "instant" email as soon as a contact enters a segment: the emails will almost never be instant due to the segmentation delays.
+### Unreliable exit conditions
 
 Finally, we have also observed that if a contact **gets removed from the parent list** of a child segment, for an Automation uses that segment with the exit criterium `When contacts no longer meets the entry criteria`, it can take up to **24 hours** before that contact stops receiving emails from the automation flow (from an n=3 sample). This basically means that an unsubscribe would take 24 hours to take effect, which is not acceptable in an email flow where multiple emails may be sent within hours from each other. Imagine: you unsubscribe from a newsletter after receiving email 1, and you still get email 2.
+### ⚠ Don't remove contacts in automations with custom exit criteria from their entry lists
 
-Luckily, we noticed that the **custom exit criteria based on custom fields** act much more quickly, within an hour at least. Therefore, we are now also using a custom field to denote a contact's newsletter subscription status, next to their list membership, and we are using `newsletter = 0` as an exit criterium.
+In another attempt, we tried to use an entry segment based on our "Newsletter Yes" top-level list, and define **custom exit criteria based on custom fields**. Upon an unsubscribe, users are removed from this top-level list, *and* they get a custom field `newsletter = 0`. Hence, there are two ways that should simultaneously remove the unsubscribed user from the flow.
 
-Again, your experience may be better if you use Unsubscribe groups, and don't rely on unsubscribers exiting source lists.
+With this approach, we noticed some extreme outliers: many unsubscribers still got *the entire flow* of 6 emails over 10 days, even after unsubscribing after the first email. We suspect there is some kind of race condition in SendGrid where users deleted from the entry segment's parent list are completely ignored whenever SendGrid checks for contacts to be exited.
+
+### What (kind of) works
+
+If you are OK with a delay of up to half a day for any change in the application of changed contact information, the following seems to work reliably. It's what we use now for our non-critical flows:
+1. Base your automation on a segment where contacts **will never leave**, except if they are fully deleted
+2. Use custom exit criteria to define when the contacts should leave
+
+Using the "last updated" field on a contact (visible via Contacts API), you can see when SendGrid has "synced" the details of the contact to its segments and automations. It generally falls within half days of the actual changes, though it can be quicker.
 
 ## 7.  ✨ Various caveats
 
@@ -143,9 +161,13 @@ When you want to change the order of emails in a flow, or add an new email in be
 
 If you need to make order changes to a big flow with Design Editor emails (and therefore restart from scratch), I recommend you use the "Export HTML" and "Import HTML" features in the Design editor, so you don't have to re-create every email from scratch.
 
-If you want to change delays between emails, you can edit a duplicated flow, but you can't do this by editing the original.
+If you want to change delays between emails, or delete emails in between, you can edit a duplicated flow, but you can't do this by setting live the original.
 
 To make other changes, like an unsubscribe link change, or change in exit conditions, you should disable the flow first before the flow becomes editable. This will lead to (small) downtimes for your flow.
+
+**Stats**
+
+Unpublishing an automation and setting it live again with changes will reset the graph of its statistics.
 
 ### Permanent ownership
 
@@ -161,6 +183,14 @@ The answer is *yes*!
 
 It sounds like something pretty common, but no, SendGrid [doesn't support updating a contact's email address directly (StackOverflow)](https://stackoverflow.com/a/71200584/4973029). After you have jumped through the above hoop of getting the SendGrid ID of a contact, you should delete the original contact and create a new one.
 
+### The Custom Unsubscribe Link doesn't URL-encode variables
+
+As I showed before, we use the Custom Unsubscribe Link `https://welcometomygarden.org/email-preferences?e={{email}}&s={{secret}}`. We noticed that the `{{email}}`field is not URL-encoded when used in this way, at least for Single Sends, and the email field is not one we control. This means that a `+` in the email handle might be parsed as a space by a URL-parsing library, and there are probably more cases like this. We had to adjust our URL parsing strategy for this.
+
+### Attachments are [not supported](https://stackoverflow.com/a/60712294/4973029) in Marketing Campaigns
+
+So you can't attach a .PDF to a Single Send or an Automation. Using some cloud storage system is usually a valid workaround.
+
 # 8. Conclusion
 
 This (rather large!) note should have shown that using SendGrid to drive the needs of a multilingual startup can be a challenge, especially when considering its Marketing components. At the same time, our integration with SendGrid is a sunk cost which meets our present needs. I hope some of these insights might relieve the cost for others just a little.
@@ -170,3 +200,5 @@ I am wondering if the grass is greener in other pastures with regards to native 
 For another project ([Women Don't Cycle](/projects/women-dont-cycle-documentary)), I combined [Maizzle](https://maizzle.com/) with a simple storage bucket to write emails in Markdown, render them into HTML in the bucket. These templates are then used together with substitution tags when sending transactional email via SendGrid. I personally appreciated the simplicity of Markdown over WYSIWYG templates, because all three language versions of the same email can actually reuse the same HTML template, and both the template and content can be independently updated.
 
 Another benefit was that we didn't have to use SendGrid's _Contacts_ and _Contact list_ features (and suffer its caveats), every email audience was queried straight from our own database without synchronization steps. Maybe this custom solution could be extended to fit WTMG's needs and the needs of other multilingual organizations better. If we add more languages to our email repertoire, I will consider building our own solution.
+
+[^1]: Minutes after sending a newsletter to thousands of people in March 2025, we could verify some reports of transactional password reset email links taking 3-5 minutes to be sent. So it's not perfect, likely due to the high activity from our account at that time.
