@@ -7,7 +7,7 @@ At [WTMG](/projects/welcome-to-my-garden) we're almost releasing our mobile app,
 
 Ensuring wide compatibility of our app required different Android devices to reproduce issues and test fixes. More realistically though, it required many emulators. Unfortunately those emulators take up storage space, which I didn't have.
 
-It's not the first time I spent significant time developing a mobile app. In fact, I bought my current Macbook Pro with 32 GB RAM in 2022 for the main purpose of running multiple simulators and emulators at the same time. The laptop I used then, a 16 GB Intel MBP from 2017, struggled with this in terms of CPU an RAM, let alone that it had a 256 GB SSD. Unfortunately, my then-desired MBP model with a 1 TB SSD had bad availability. Which meant I settled for 512 GB version, and so here I was, again trying to figure out how I could offload some emulators to an external SSD.
+It's not the first time I spent significant time developing a mobile app. In fact, I bought my current Macbook Pro with 32 GB RAM in 2022 for the main purpose of running multiple simulators and emulators at the same time. The laptop I used then, a 16 GB Intel MBP from 2017, struggled with this in terms of CPU and RAM, let alone that it had a 256 GB SSD. Unfortunately, my then-desired MBP model with a 1 TB SSD had bad availability. Which meant I settled for 512 GB version, and so here I was, again trying to figure out how I could offload some emulators to an external SSD.
 
 Back then, I figured it out thanks to [a dev.to blog post](https://dev.to/oscherler/move-android-studio-virtual-devices-on-a-mac-5ej5) (on which I even wrote some comments).
 
