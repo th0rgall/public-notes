@@ -1,7 +1,17 @@
 ---
 stage: published
 created: 2025-03-05
+state: deprecated 
 ---
+
+Note: this post proposes complicated workarounds for a feature that has since been added natively to Bitwarden & Vaultwarden. 
+
+- Bitwarden added support for archiving items [in the 2026.2.1 release](https://bitwarden.com/help/releasenotes/#2026-2-1)
+- Vaultwarden also [followed with support](https://github.com/dani-garcia/vaultwarden/pull/6916) in late May 2026.
+
+The approaches described here are therefore obsolete. I'm keeping this note online for reference.
+
+# Original post
 
 Unlike 1Password, Bitwarden/Vaultwarden does not have a dedicated "archival" feature. It's the 10th most popular [feature request](https://community.bitwarden.com/t/archive-old-accounts/7191/156) in the Bitwarden forums at the time of writing.
 
