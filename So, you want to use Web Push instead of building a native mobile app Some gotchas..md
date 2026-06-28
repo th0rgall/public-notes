@@ -1,7 +1,6 @@
 ---
 stage: draft
 ---
-
 Recently, I was happily surprised when noticing
 
 ## When your user uses iOS
@@ -72,3 +71,11 @@ Ecosia: it's not possible to add a PWA.
 
 - The first issue can be worked around with a HTTPS-enabled reverse-proxy. The second can't be worked around, without changing the SDK code (which I only briefly attempted).
 - **Implications**: - it's easy to test web push on a **dev machine http localhost with emulators**, with a spoofed mobile phone User Agent (because we only allow notifications on mobile phones, by User Agent) - it's easy to test web push on mobile, using the real staging/production servers - it's _not_ easy to test with emulators on a real mobile device. The only way I got it to work: 1) to run a reverse nginx proxy in iSH on an iPhone, that connects to HTTP emulators on a desktop. This way, you can connect to localhost on the iPhone.
+
+
+## Firefox
+
+// We decided to _not_ allow notifications on Firefox on Android, because
+// - on a notification tap, Firefox may open a blank page or any last page from history
+// - PWA experience is "just a bookmark", not like Chrome
+// - unregistering doesn't work like in Chrome (PushSubscription stays active after programmatic unsub)
